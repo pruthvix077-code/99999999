@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N9NE - Premium Clothing Store</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">🛍️ N9NE</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#products">Shop</a></li>
+                <li><a href="#" class="cart-icon" onclick="toggleCart()">🛒 Cart (<span id="cart-count">0</span>)</a></li>
+                <li><a href="admin.html" class="admin-link">👤 Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Welcome to N9NE</h1>
+            <p>Premium Clothing for Premium You</p>
+            <button onclick="scrollTo('#products')" class="btn btn-primary">Shop Now</button>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products" id="products">
+        <div class="container">
+            <h2>Our Collection</h2>
+            <div class="products-grid" id="products-grid">
+                <!-- Products will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Shopping Cart Sidebar -->
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h3>Shopping Cart</h3>
+            <button onclick="toggleCart()" class="close-btn">✕</button>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <!-- Cart items will be displayed here -->
+        </div>
+        <div class="cart-total">
+            <strong>Total: ₹<span id="total-price">0</span></strong>
+        </div>
+        <button onclick="checkout()" class="btn btn-primary btn-full">Proceed to Checkout</button>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="payment-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Choose Payment Method</h2>
+                <button onclick="closeModal()" class="close-btn">✕</button>
+            </div>
+            <div class="payment-options">
+                <button onclick="processPayment('upi')" class="payment-btn">
+                    <span class="icon">₹</span> UPI Payment
+                </button>
+                <button onclick="processPayment('card')" class="payment-btn">
+                    <span class="icon">💳</span> Credit/Debit Card
+                </button>
+                <button onclick="processPayment('whatsapp')" class="payment-btn">
+                    <span class="icon">💬</span> WhatsApp Order
+                </button>
+                <button onclick="processPayment('netbanking')" class="payment-btn">
+                    <span class="icon">🏦</span> Net Banking
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Modal -->
+    <div class="modal" id="whatsapp-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Order via WhatsApp</h2>
+                <button onclick="closeModal()" class="close-btn">✕</button>
+            </div>
+            <div class="whatsapp-content">
+                <p>📲 Send your order details via WhatsApp to our team!</p>
+                <p><strong>WhatsApp Number:</strong> +91 9421883196</p>
+                <div id="order-summary" class="order-summary">
+                    <!-- Order summary will be shown here -->
+                </div>
+                <a href="https://wa.me/919421883196?text=Hi%2C%20I%20want%20to%20place%20an%20order%20from%20N9NE" 
+                   target="_blank" class="btn btn-primary btn-full">
+                   📱 Open WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Success Modal -->
+    <div class="modal" id="success-modal">
+        <div class="modal-content modal-success">
+            <div class="success-icon">✓</div>
+            <h2>Order Placed Successfully!</h2>
+            <p id="order-message"></p>
+            <p id="order-id"></p>
+            <button onclick="resetAndClose()" class="btn btn-primary">Continue Shopping</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 N9NE - Premium Clothing. All rights reserved.</p>
+            <p>📞 WhatsApp: 9421883196 | 📧 Support: support@n9ne.com</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

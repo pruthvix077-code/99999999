@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N9NE — Clothing</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #FF2A1F;
+    --black: #0A0A0A;
+    --white: #F5F5F0;
+    --gray: #1A1A1A;
+    --gray2: #2A2A2A;
+    --muted: #888;
+    --border: rgba(255,255,255,0.08);
+    --green: #25D366;
+    --upi: #4CAF50;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* CURSOR */
+  #cursor {
+    position: fixed; width: 12px; height: 12px;
+    background: var(--red); border-radius: 50%;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: width 0.2s, height 0.2s, background 0.2s;
+  }
+  #cursor.big { width: 40px; height: 40px; background: rgba(255,42,31,0.3); }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px; letter-spacing: 4px; color: var(--white);
+    cursor: pointer;
+  }
+  .nav-logo span { color: var(--red); }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links li a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--muted); text-decoration: none;
+    transition: color 0.2s; cursor: pointer;
+  }
+  .nav-links li a:hover { color: var(--white); }
+  .nav-right { display: flex; align-items: center; gap: 20px; }
+  .cart-btn, .admin-btn, .support-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+    background: none; border: 1px solid var(--border);
+    color: var(--white); padding: 8px 20px; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .cart-btn:hover, .admin-btn:hover, .support-btn:hover { border-color: var(--red); background: rgba(255,42,31,0.08); }
+  .support-btn { border-color: var(--green); }
+  .support-btn:hover { background: rgba(37,211,102,0.08); }
+  .cart-count {
+    display: inline-block; background: var(--red);
+    color: #fff; font-size: 10px; font-weight: 700;
+    width: 18px; height: 18px; border-radius: 50%;
+    text-align: center; line-height: 18px; margin-left: 6px;
+  }
+
+  /* PAGES */
+  .page { display: none; min-height: 100vh; padding-top: 80px; }
+  .page.active { display: block; }
+
+  /* CHECKOUT WITH PAYMENT */
+  .payment-container {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 40px;
+    padding: 60px 48px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .payment-section {
+    background: var(--gray);
+    border: 1px solid var(--border);
+    padding: 40px;
+    border-radius: 4px;
+  }
+
+  .payment-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 4px;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .payment-methods-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .payment-option {
+    border: 2px solid var(--border);
+    padding: 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+  }
+
+  .payment-option:hover {
+    border-color: var(--red);
+    background: rgba(255,42,31,0.08);
+  }
+
+  .payment-option.selected {
+    border-color: var(--red);
+    background: rgba(255,42,31,0.15);
+  }
+
+  .payment-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+
+  .payment-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+
+  /* UPI SECTION */
+  .upi-section {
+    display: none;
+    margin-top: 32px;
+  }
+
+  .upi-section.active {
+    display: block;
+  }
+
+  .qr-container {
+    background: var(--black);
+    border: 1px solid var(--border);
+    padding: 32px;
+    text-align: center;
+    border-radius: 8px;
+    margin-bottom: 24px;
+  }
+
+  .qr-code {
+    width: 200px;
+    height: 200px;
+    background: var(--white);
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 80px;
+  }
+
+  .upi-id-display {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    background: var(--gray2);
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+    word-break: break-all;
+    border: 1px solid var(--border);
+  }
+
+  .upi-copy-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: var(--upi);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  .upi-copy-btn:hover {
+    background: #3d8b40;
+  }
+
+  .upi-apps {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .upi-app-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: var(--gray2);
+    border: 1px solid var(--border);
+    color: var(--white);
+    padding: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .upi-app-btn:hover {
+    border-color: var(--upi);
+    color: var(--upi);
+  }
+
+  /* WHATSAPP SECTION */
+  .whatsapp-section {
+    display: none;
+    margin-top: 32px;
+  }
+
+  .whatsapp-section.active {
+    display: block;
+  }
+
+  .whatsapp-box {
+    background: rgba(37,211,102,0.1);
+    border: 2px solid var(--green);
+    padding: 32px;
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  .whatsapp-icon {
+    font-size: 50px;
+    margin-bottom: 16px;
+  }
+
+  .whatsapp-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+
+  .whatsapp-desc {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .whatsapp-number {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    letter-spacing: 2px;
+    background: var(--gray2);
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    border: 1px solid var(--green);
+  }
+
+  .whatsapp-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    font-weight: 600;
+  }
+
+  .whatsapp-btn:hover {
+    background: #1eb854;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(37,211,102,0.4);
+  }
+
+  .order-summary-box {
+    background: var(--gray2);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 4px;
+    margin-top: 16px;
+    text-align: left;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .order-item-preview {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .order-item-preview:last-child {
+    border-bottom: none;
+  }
+
+  .order-total-preview {
+    padding: 12px 0;
+    margin-top: 8px;
+    border-top: 1px solid var(--red);
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    color: var(--red);
+  }
+
+  /* SUMMARY SIDEBAR */
+  .checkout-summary {
+    background: var(--gray);
+    border: 1px solid var(--border);
+    padding: 40px;
+    height: fit-content;
+    position: sticky;
+    top: 120px;
+  }
+
+  .summary-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 3px;
+    margin-bottom: 24px;
+  }
+
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+
+  .summary-total {
+    padding: 16px 0;
+    margin-top: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    color: var(--red);
+  }
+
+  .proceed-btn {
+    width: 100%;
+    background: var(--red);
+    color: white;
+    border: none;
+    padding: 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 24px;
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
+
+  .proceed-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(255,42,31,0.4);
+  }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 32px; right: 32px; z-index: 9999;
+    background: var(--red); color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px; letter-spacing: 3px; text-transform: uppercase;
+    padding: 14px 24px;
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s; border-radius: 4px;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* HERO */
+  .hero {
+    position: relative; min-height: calc(100vh - 80px);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0000 50%, #0a0a0a 100%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0; opacity: 0.04;
+    background-image: repeating-linear-gradient(0deg, var(--white) 0, var(--white) 1px, transparent 1px, transparent 60px),
+                      repeating-linear-gradient(90deg, var(--white) 0, var(--white) 1px, transparent 1px, transparent 60px);
+  }
+  .hero-content {
+    position: relative; text-align: center; z-index: 2;
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px; letter-spacing: 6px; text-transform: uppercase;
+    color: var(--red); margin-bottom: 24px;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(120px, 18vw, 260px);
+    line-height: 0.85; letter-spacing: 8px;
+    color: var(--white);
+  }
+  .hero-title .nine { color: var(--red); }
+  .hero-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px; letter-spacing: 8px; text-transform: uppercase;
+    color: var(--muted); margin-top: 20px; margin-bottom: 48px;
+  }
+  .btn-primary {
+    display: inline-block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; letter-spacing: 4px; text-transform: uppercase;
+    background: var(--red); color: #fff;
+    padding: 16px 48px; border: none; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,42,31,0.4); }
+
+  .marquee-wrap {
+    overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    padding: 14px 0; background: var(--gray);
+  }
+  .marquee-inner {
+    display: flex; gap: 0; white-space: nowrap;
+    animation: marquee 18s linear infinite;
+  }
+  .marquee-item {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px; letter-spacing: 6px; color: var(--muted);
+    padding: 0 40px;
+  }
+  .marquee-item span { color: var(--red); }
+
+  /* PRODUCTS */
+  .section { padding: 100px 48px; }
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; letter-spacing: 5px; text-transform: uppercase;
+    color: var(--red); margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 80px); letter-spacing: 4px;
+    color: var(--white); margin-bottom: 60px;
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2px;
+  }
+  .product-card {
+    position: relative; overflow: hidden; cursor: pointer;
+    background: var(--gray);
+    transition: transform 0.3s;
+  }
+  .product-card:hover { transform: scale(1.01); }
+  .product-img-placeholder {
+    width: 100%; aspect-ratio: 3/4;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 80px; letter-spacing: 4px;
+    transition: transform 0.5s;
+  }
+  .product-card:hover .product-img-placeholder { transform: scale(1.06); }
+  .product-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 24px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+    transform: translateY(8px); transition: transform 0.3s;
+  }
+  .product-card:hover .product-overlay { transform: translateY(0); }
+  .product-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--white);
+  }
+  .product-price {
+    font-size: 15px; color: var(--red); margin-top: 4px;
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;
+  }
+  .product-tag {
+    position: absolute; top: 16px; left: 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+    background: var(--red); color: #fff; padding: 4px 10px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .payment-container { grid-template-columns: 1fr; }
+    .checkout-summary { position: static; }
+    .payment-methods-grid { grid-template-columns: 1fr; }
+    .upi-apps { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="toast">Payment Method Selected</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">N<span>9</span>NE</div>
+  <ul class="nav-links">
+    <li><a onclick="showPage('shop')">Shop</a></li>
+    <li><a onclick="showPage('collections')">Collections</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="cart-btn" onclick="showPage('cart')">Bag <span class="cart-count" id="cart-count">0</span></button>
+    <a href="https://wa.me/919421883196?text=Hi%20N9NE!%20I%20have%20a%20query" target="_blank" class="support-btn" style="text-decoration: none;">💬 Support</a>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">New Collection — SS 2025</p>
+      <h1 class="hero-title">N<span class="nine">9</span>NE</h1>
+      <p class="hero-sub">Wear the number. Own the identity.</p>
+      <button class="btn-primary" onclick="showPage('shop')">Shop Now</button>
+    </div>
+  </section>
+
+  <div class="marquee-wrap">
+    <div class="marquee-inner">
+      <span class="marquee-item">N<span>9</span>NE CLOTHING</span>
+      <span class="marquee-item">UPI PAYMENT AVAILABLE</span>
+      <span class="marquee-item">WHATSAPP SUPPORT 24/7</span>
+      <span class="marquee-item">FREE DELIVERY ABOVE ₹999</span>
+      <span class="marquee-item">N<span>9</span>NE CLOTHING</span>
+      <span class="marquee-item">UPI PAYMENT AVAILABLE</span>
+      <span class="marquee-item">WHATSAPP SUPPORT 24/7</span>
+      <span class="marquee-item">FREE DELIVERY ABOVE ₹999</span>
+    </div>
+  </div>
+
+  <section class="section">
+    <p class="section-label">Featured</p>
+    <h2 class="section-title">New Arrivals</h2>
+    <div class="product-grid" id="home-products"></div>
+  </section>
+</div>
+
+<!-- CHECKOUT PAGE WITH PAYMENT -->
+<div id="page-checkout" class="page">
+  <div class="payment-container">
+    <!-- Payment Options -->
+    <div>
+      <div class="payment-section">
+        <h2 class="payment-title">Choose Payment Method</h2>
+        
+        <div class="payment-methods-grid">
+          <div class="payment-option" onclick="selectPayment('upi', this)">
+            <div class="payment-icon">📱</div>
+            <div class="payment-label">UPI Payment</div>
+          </div>
+          
+          <div class="payment-option" onclick="selectPayment('whatsapp', this)">
+            <div class="payment-icon">💬</div>
+            <div class="payment-label">WhatsApp Order</div>
+          </div>
+        </div>
+
+        <!-- UPI Section -->
+        <div class="upi-section" id="upi-section">
+          <div class="qr-container">
+            <div class="qr-code">📲</div>
+            <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;">UPI ID</p>
+            <div class="upi-id-display" id="upi-id-text">9421883196@slc</div>
+            <button class="upi-copy-btn" onclick="copyUPIId()">📋 Copy UPI ID</button>
+          </div>
+
+          <div style="background: var(--black); border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-bottom: 16px;">
+            <p style="font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px;">Send payment to:</p>
+            <p style="font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; color: var(--green);">₹<span id="upi-amount">0</span></p>
+          </div>
+
+          <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px; text-align: center;">Select your preferred UPI app below:</p>
+          
+          <div class="upi-apps">
+            <a href="upi://pay?pa=9421883196@slc&pn=N9NE%20Clothing&am=1&tr=N9NE&tn=N9NE%20Order" target="_blank" class="upi-app-btn" style="text-decoration: none;">
+              Google Pay
+            </a>
+            <a href="upi://pay?pa=9421883196@slc&pn=N9NE%20Clothing&am=1&tr=N9NE&tn=N9NE%20Order" target="_blank" class="upi-app-btn" style="text-decoration: none;">
+              PhonePe
+            </a>
+            <a href="upi://pay?pa=9421883196@slc&pn=N9NE%20Clothing&am=1&tr=N9NE&tn=N9NE%20Order" target="_blank" class="upi-app-btn" style="text-decoration: none;">
+              Paytm
+            </a>
+            <a href="upi://pay?pa=9421883196@slc&pn=N9NE%20Clothing&am=1&tr=N9NE&tn=N9NE%20Order" target="_blank" class="upi-app-btn" style="text-decoration: none;">
+              BHIM
+            </a>
+          </div>
+
+          <div style="background: rgba(76, 175, 80, 0.1); border: 1px solid var(--upi); padding: 16px; border-radius: 4px; margin-top: 20px; text-align: center;">
+            <p style="font-size: 12px; color: var(--muted);">After payment, take a screenshot and send it via WhatsApp for order confirmation</p>
+          </div>
+        </div>
+
+        <!-- WhatsApp Section -->
+        <div class="whatsapp-section" id="whatsapp-section">
+          <div class="whatsapp-box">
+            <div class="whatsapp-icon">💬</div>
+            <div class="whatsapp-title">Chat with us!</div>
+            <p class="whatsapp-desc">Send your order details via WhatsApp for quick confirmation</p>
+            
+            <div class="order-summary-box" id="whatsapp-order-summary">
+              <div style="text-align: center; color: var(--muted); padding: 20px;">Loading order...</div>
+            </div>
+
+            <div class="whatsapp-number">
+              📞 +91 9421883196
+            </div>
+
+            <a href="https://wa.me/919421883196?text=Hi%20N9NE!%20I%20want%20to%20place%20an%20order" target="_blank" class="whatsapp-btn" style="text-decoration: none;">
+              📱 Open WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Summary Sidebar -->
+    <div class="checkout-summary">
+      <h3 class="summary-title">Order Summary</h3>
+      <div id="checkout-items" style="margin-bottom: 20px;"></div>
+      <div class="summary-item">
+        <span>Subtotal</span>
+        <span id="summary-subtotal">₹0</span>
+      </div>
+      <div class="summary-item">
+        <span>Shipping</span>
+        <span id="summary-shipping">₹99</span>
+      </div>
+      <div class="summary-item summary-total">
+        <span>Total</span>
+        <span id="summary-total">₹0</span>
+      </div>
+      <button class="proceed-btn" onclick="proceedWithPayment()">Confirm Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHOP PAGE -->
+<div id="page-shop" class="page">
+  <section class="section">
+    <p class="section-label">Our Collection</p>
+    <h2 class="section-title">Shop</h2>
+    <div class="product-grid" id="shop-products"></div>
+  </section>
+</div>
+
+<!-- COLLECTIONS PAGE -->
+<div id="page-collections" class="page">
+  <section class="section">
+    <p class="section-label">SS 2025</p>
+    <h2 class="section-title">Lookbook</h2>
+    <div class="product-grid" id="coll-products"></div>
+  </section>
+</div>
+
+<!-- CART PAGE -->
+<div id="page-cart" class="page">
+  <section class="section" style="padding: 40px 48px;">
+    <h2 class="section-title" style="margin-bottom: 40px;">Your Bag</h2>
+    <div id="cart-content">
+      <div style="text-align: center; padding: 60px 0;">
+        <p style="font-size: 18px; color: var(--muted); margin-bottom: 24px;">Your bag is empty</p>
+        <button class="btn-primary" onclick="showPage('shop')">Continue Shopping</button>
+      </div>
+    </div>
+    <div id="cart-checkout" style="display: none; text-align: center; margin-top: 40px;">
+      <button class="btn-primary" onclick="showPage('checkout')" style="padding: 20px 48px; font-size: 15px;">Proceed to Checkout</button>
+    </div>
+  </section>
+</div>
+
+<script>
+// ============ DATA ============
+const products = [
+  { id:1, name:'N9NE Core Tee', price:799, category:'tee', color:'#1a1a1a', label:'Bestseller', desc:'The signature N9NE Core Tee' },
+  { id:2, name:'Red Nine Hoodie', price:1899, category:'hoodie', color:'#2d0000', label:'New', desc:'Heavy fleece hoodie in signature red' },
+  { id:3, name:'Block Cargo Pants', price:2299, category:'bottom', color:'#111', label:'', desc:'Technical ripstop cargo pants' },
+  { id:4, name:'Nine Arch Tee', price:899, category:'tee', color:'#0a0a0a', label:'', desc:'Graphic tee with N9NE arch logo' },
+  { id:5, name:'Track Jacket', price:2599, category:'jacket', color:'#1a0000', label:'Limited', desc:'Woven track jacket with contrast stripe' },
+  { id:6, name:'N9NE Logo Shorts', price:999, category:'bottom', color:'#1c1c1c', label:'', desc:'French terry shorts with N9NE wordmark' },
+];
+
+let cart = [];
+let selectedPaymentMethod = null;
+
+// ============ CURSOR ============
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+document.addEventListener('mouseover', e => {
+  if(e.target.matches('button, a, .product-card, .payment-option, .upi-app-btn')) cursor.classList.add('big');
+});
+document.addEventListener('mouseout', () => cursor.classList.remove('big'));
+
+// ============ PAGES ============
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  window.scrollTo(0,0);
+  if(name === 'shop') renderShopProducts();
+  if(name === 'collections') renderCollectionProducts();
+  if(name === 'cart') renderCart();
+  if(name === 'checkout') renderCheckout();
+}
+
+// ============ PRODUCT RENDERING ============
+function makeCard(p) {
+  return `
+    <div class="product-card" onclick="addToCart(${p.id})">
+      <div class="product-img-placeholder" style="background:${p.color};color:${p.color==='#ffffff'?'#111':'rgba(255,255,255,0.12)'};">N9NE</div>
+      ${p.label ? `<div class="product-tag">${p.label}</div>` : ''}
+      <div class="product-overlay">
+        <div class="product-name">${p.name}</div>
+        <div class="product-price">₹${p.price}</div>
+      </div>
+    </div>`;
+}
+
+function renderShopProducts() {
+  document.getElementById('shop-products').innerHTML = products.map(makeCard).join('');
+}
+
+function renderCollectionProducts() {
+  document.getElementById('coll-products').innerHTML = products.map(makeCard).join('');
+}
+
+function renderHomeProducts() {
+  document.getElementById('home-products').innerHTML = products.slice(0,4).map(makeCard).join('');
+}
+
+// ============ CART ============
+function addToCart(id) {
+  const product = products.find(p => p.id === id);
+  const existing = cart.find(c => c.id === id);
+  if(existing) existing.qty++;
+  else cart.push({ ...product, qty: 1 });
+  updateCartCount();
+  showToast(product.name + ' added to bag!');
+}
+
+function updateCartCount() {
+  const total = cart.reduce((a,b) => a + b.qty, 0);
+  document.getElementById('cart-count').textContent = total;
+}
+
+function renderCart() {
+  const cartContent = document.getElementById('cart-content');
+  const checkoutBtn = document.getElementById('cart-checkout');
+  
+  if(cart.length === 0) {
+    cartContent.innerHTML = `
+      <div style="text-align: center; padding: 60px 0;">
+        <p style="font-size: 18px; color: var(--muted); margin-bottom: 24px;">Your bag is empty</p>
+        <button class="btn-primary" onclick="showPage('shop')">Continue Shopping</button>
+      </div>
+    `;
+    checkoutBtn.style.display = 'none';
+    return;
+  }
+  
+  const total = cart.reduce((a,b) => a + b.price * b.qty, 0);
+  
+  cartContent.innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+      <div>
+        ${cart.map((item, i) => `
+          <div style="display: grid; grid-template-columns: 100px 1fr auto; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--border);">
+            <div style="background:${item.color};width:100px;height:100px;border-radius:4px;"></div>
+            <div>
+              <p style="font-family:'Barlow Condensed',sans-serif;font-size:18px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">${item.name}</p>
+              <p style="color:var(--muted);font-size:13px;">₹${item.price} x ${item.qty}</p>
+            </div>
+            <div style="text-align:right;">
+              <p style="font-family:'Barlow Condensed',sans-serif;font-size:18px;color:var(--red);margin-bottom:12px;">₹${item.price * item.qty}</p>
+              <button onclick="removeFromCart(${i})" style="background:rgba(255,42,31,0.2);color:var(--red);border:1px solid var(--red);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;">Remove</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="background:var(--gray);border:1px solid var(--border);padding:32px;border-radius:4px;height:fit-content;">
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;margin-bottom:24px;">Summary</h3>
+        <div style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+          <span>Subtotal</span>
+          <span>₹${total}</span>
+        </div>
+        <div style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+          <span>Shipping</span>
+          <span>${total >= 999 ? 'FREE' : '₹99'}</span>
+        </div>
+        <div style="padding:12px 0;display:flex;justify-content:space-between;font-size:18px;font-weight:600;color:var(--red);">
+          <span>Total</span>
+          <span>₹${total + (total >= 999 ? 0 : 99)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+  checkoutBtn.style.display = 'block';
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  updateCartCount();
+  renderCart();
+}
+
+// ============ PAYMENT ============
+function renderCheckout() {
+  const subtotal = cart.reduce((a,b) => a + b.price * b.qty, 0);
+  const shipping = subtotal >= 999 ? 0 : 99;
+  const total = subtotal + shipping;
+  
+  // Populate UPI amount
+  document.getElementById('upi-amount').textContent = total;
+  
+  // Summary items
+  document.getElementById('checkout-items').innerHTML = cart.map(item => `
+    <div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">
+      <div style="width:40px;height:40px;background:${item.color};border-radius:4px;flex-shrink:0;"></div>
+      <div style="flex:1;font-size:13px;">
+        <p style="font-weight:600;margin-bottom:2px;">${item.name}</p>
+        <p style="color:var(--muted);">₹${item.price} x ${item.qty}</p>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('summary-subtotal').textContent = '₹' + subtotal;
+  document.getElementById('summary-shipping').textContent = shipping === 0 ? 'FREE' : '₹' + shipping;
+  document.getElementById('summary-total').textContent = '₹' + total;
+  
+  // WhatsApp order summary
+  const orderText = cart.map(item => `${item.name} (₹${item.price} x ${item.qty})`).join('\n');
+  document.getElementById('whatsapp-order-summary').innerHTML = `
+    <div style="text-align:left;">
+      ${cart.map(item => `
+        <div class="order-item-preview">
+          <span>${item.name} x${item.qty}</span>
+          <span>₹${item.price * item.qty}</span>
+        </div>
+      `).join('')}
+      <div class="order-total-preview">
+        <span>Total</span>
+        <span>₹${total}</span>
+      </div>
+    </div>
+  `;
+  
+  selectedPaymentMethod = null;
+}
+
+function selectPayment(method, el) {
+  selectedPaymentMethod = method;
+  document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  
+  document.getElementById('upi-section').classList.remove('active');
+  document.getElementById('whatsapp-section').classList.remove('active');
+  
+  if(method === 'upi') document.getElementById('upi-section').classList.add('active');
+  if(method === 'whatsapp') document.getElementById('whatsapp-section').classList.add('active');
+  
+  showToast('Payment method: ' + method.toUpperCase());
+}
+
+function copyUPIId() {
+  const upiId = '9421883196@slc';
+  navigator.clipboard.writeText(upiId).then(() => {
+    showToast('UPI ID copied!');
+  });
+}
+
+function proceedWithPayment() {
+  if(!selectedPaymentMethod) {
+    showToast('Select payment method');
+    return;
+  }
+  
+  if(selectedPaymentMethod === 'upi') {
+    const total = cart.reduce((a,b) => a + b.price * b.qty, 0) + (cart.reduce((a,b) => a + b.price * b.qty, 0) >= 999 ? 0 : 99);
+    showToast('Opening UPI app...');
+    // UPI link will be triggered by clicking the button
+  } else if(selectedPaymentMethod === 'whatsapp') {
+    const orderText = cart.map(item => `• ${item.name} (x${item.qty}) - ₹${item.price * item.qty}`).join('%0A');
+    const total = cart.reduce((a,b) => a + b.price * b.qty, 0) + (cart.reduce((a,b) => a + b.price * b.qty, 0) >= 999 ? 0 : 99);
+    const message = `Hi N9NE!%0AI want to place an order:%0A${orderText}%0A%0ATotal: ₹${total}`;
+    window.open(`https://wa.me/919421883196?text=${message}`, '_blank');
+    showToast('WhatsApp opened!');
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Initialize
+renderHomeProducts();
+updateCartCount();
+</script>
+</body>
+</html>
